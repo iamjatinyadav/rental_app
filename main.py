@@ -23,17 +23,18 @@ class Customer:
         print(self.customer_detail)
         mycursor.execute("INSERT INTO customer (name,phone,email,created) values (%s,%s,%s,%s) ", (self.name,self.phone,self.email,datetime.now()));
         mydb.commit()
+
         print("1. for add more customer")
         print("any key to exit")
         val = input("Enter input:-")
         if val == '1':
-            c1.add_more()
+            self.add_more()
         else:
             return 
 
 
     def add_more(self):
-            c1.add_detail()
+            self.add_detail()
 
     def show_detail(self):
         mycursor.execute("select * from customer")
@@ -41,7 +42,7 @@ class Customer:
         for i in mycursor:
             print(i)
 
-c1=Customer()
+
 
 
 class Vehicles(Customer):
@@ -67,23 +68,23 @@ class Vehicles(Customer):
             print("Enter correct vehicle type")
 
     def rent_vehicles(self):
-        name_list=["jatin"]
+        name_list=[]
         mycursor.execute("select name from customer")
-        for i in mycursor:
-            print(i)
-            name_list.append(i)
+        result = mycursor.fetchall()
+        print("Total customer name are:", len(result))
+        for i in result:
+            #print("Name: ", i[0])
+            name_list.append(i[0])
         print(name_list)
         while True:
             cname = input("Enter the name from the list:-")
-            #cname = f"('{cname}',)"
-            print(cname)
             if cname in name_list:
                 return_date = int(input("Enter the return date"))
                 self.show_vehicles()
-                vehicle_type = input("Enter the vehicle type from the list")
-                x = self.default_vehicles[vehicle_type]
                 while True:
+                    vehicle_type = input("Enter the vehicle type from the list")
                     if vehicle_type in self.default_vehicles:
+                        x = self.default_vehicles[vehicle_type]
                         if x > 0:
                             mycursor.execute("INSERT INTO rental_detail (c_name,created_at,return_date,veh_type) values"
                                          " (%s,%s,%s,%s) ", (cname, datetime.now(), return_date, vehicle_type));
@@ -94,16 +95,26 @@ class Vehicles(Customer):
                             break
                         else:
                             print(f"{vehicle_type} cannot be rented as it is already booked")
-                            break
+
                         break
                     else:
                         print(f"{vehicle_type} is not present in vehicles inventory.")
+
                 break
             else:
                 print("Please enter right name!")
 
 
+    def rental_book_list(self):
+        mycursor.execute("select * from rental_detail")
+        result = mycursor.fetchall()
 
+        for i in result:
+            print("id:",i[0])
+            print("name:",i[1])
+            print("rent_datetime:", i[2])
+            print("return_date:",i[3])
+            print("vehicle_type:",i[4])
 
     def show_vehicles(self):
         print(self.default_vehicles)
@@ -127,6 +138,8 @@ Press any other key to exit
             vehicle.rent_vehicles()
         elif ei == '3':
             vehicle.show_detail()
+        elif ei == '4':
+            vehicle.rental_book_list()
         elif ei == '5':
             vehicle.show_vehicles()
         else:
